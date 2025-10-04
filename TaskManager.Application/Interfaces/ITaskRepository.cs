@@ -10,7 +10,7 @@ public interface ITaskRepository
 
     Task UpdateAsync(TaskItem task, CancellationToken cancellationToken = default);
 
-    Task DeleteAsync(TaskItem task, CancellationToken cancellationToken = default);
+    Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
 
     Task SaveChangesAsync(CancellationToken cancellationToken = default);
 }

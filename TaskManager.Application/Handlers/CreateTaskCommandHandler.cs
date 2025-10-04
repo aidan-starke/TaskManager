@@ -7,10 +7,7 @@ public class CreateTaskCommandHandler(ITaskRepository taskRepository) : IRequest
 
     public async Task<Guid> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
     {
-        if (cancellationToken.IsCancellationRequested)
-        {
-            return await Task.FromCanceled<Guid>(cancellationToken);
-        }
+        cancellationToken.ThrowIfCancellationRequested();
 
         TaskItem task = new(request.Title)
         {
