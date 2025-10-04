@@ -3,7 +3,7 @@
 public class TaskItem
 {
     public Guid Id { get; init; }
-    public required string Title { get; set; }
+    public string Title { get; set; }
     public string? Description { get; set; }
     public TaskPriority Priority { get; set; }
     public List<string> Tags { get; set; } = new();
