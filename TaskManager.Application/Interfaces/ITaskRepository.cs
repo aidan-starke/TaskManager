@@ -1,5 +1,7 @@
 using TaskManager.Domain;
 
+namespace TaskManager.Application.Interfaces;
+
 public interface ITaskRepository
 {
     Task<TaskItem?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);

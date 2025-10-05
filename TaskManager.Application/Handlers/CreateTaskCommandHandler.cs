@@ -1,10 +1,13 @@
 using MediatR;
+using TaskManager.Application.Commands;
+using TaskManager.Application.Interfaces;
 using TaskManager.Domain;
 
-public class CreateTaskCommandHandler(ITaskRepository taskRepository) : IRequestHandler<CreateTaskCommand, Guid>
-{
-    public ITaskRepository TaskRepository { get; } = taskRepository;
+namespace TaskManager.Application.Handlers;
 
+public class CreateTaskCommandHandler(ITaskRepository TaskRepository)
+    : IRequestHandler<CreateTaskCommand, Guid>
+{
     public async Task<Guid> Handle(CreateTaskCommand request, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
@@ -14,12 +17,11 @@ public class CreateTaskCommandHandler(ITaskRepository taskRepository) : IRequest
             Description = request.Description,
             Priority = request.Priority,
             Tags = request.Tags ?? [],
-            DueDate = request.DueDate
+            DueDate = request.DueDate,
         };
 
         await TaskRepository.AddAsync(task, cancellationToken);
         await TaskRepository.SaveChangesAsync(cancellationToken);
-
 
         return task.Id;
     }

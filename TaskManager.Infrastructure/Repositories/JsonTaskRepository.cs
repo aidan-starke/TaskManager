@@ -1,5 +1,6 @@
-using TaskManager.Domain;
 using System.Text.Json;
+using TaskManager.Application.Interfaces;
+using TaskManager.Domain;
 
 namespace TaskManager.Infrastructure.Repositories;
 
@@ -16,12 +17,12 @@ public class JsonTaskRepository : ITaskRepository
         _FileInfo = new(filePath);
 
         TaskItems = new Lazy<List<TaskItem>>(() =>
-                {
-                    if (_FileInfo.Length == 0) return new();
+        {
+            if (_FileInfo.Length == 0)
+                return new();
 
-                    return JsonSerializer.Deserialize<List<TaskItem>>(File.ReadAllText(filePath)) ?? new();
-                });
-
+            return JsonSerializer.Deserialize<List<TaskItem>>(File.ReadAllText(filePath)) ?? new();
+        });
     }
 
     public async Task<TaskItem?> GetByIdAsync(Guid id, CancellationToken cancellationToken)
@@ -31,7 +32,9 @@ public class JsonTaskRepository : ITaskRepository
         return TaskItems.Value.FirstOrDefault(x => x.Id == id);
     }
 
-    public async Task<IEnumerable<TaskItem>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<TaskItem>> GetAllAsync(
+        CancellationToken cancellationToken = default
+    )
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -71,6 +74,10 @@ public class JsonTaskRepository : ITaskRepository
         cancellationToken.ThrowIfCancellationRequested();
 
         await using var fileStream = _FileInfo.Open(FileMode.Create);
-        await JsonSerializer.SerializeAsync(fileStream, TaskItems.Value, cancellationToken: cancellationToken);
+        await JsonSerializer.SerializeAsync(
+            fileStream,
+            TaskItems.Value,
+            cancellationToken: cancellationToken
+        );
     }
 }
