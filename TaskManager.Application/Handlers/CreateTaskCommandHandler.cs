@@ -12,13 +12,13 @@ public class CreateTaskCommandHandler(ITaskRepository TaskRepository)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        TaskItem task = new(request.Title)
-        {
-            Description = request.Description,
-            Priority = request.Priority,
-            Tags = request.Tags ?? [],
-            DueDate = request.DueDate,
-        };
+        TaskItem task = new(
+            request.Title,
+            request.Description,
+            request.Tags,
+            request.DueDate,
+            request.Priority
+        );
 
         await TaskRepository.AddAsync(task, cancellationToken);
         await TaskRepository.SaveChangesAsync(cancellationToken);

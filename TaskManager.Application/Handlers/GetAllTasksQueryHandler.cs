@@ -13,6 +13,8 @@ public class GetAllTasksQueryHandler(ITaskRepository TaskRepository)
         CancellationToken cancellationToken
     )
     {
+        cancellationToken.ThrowIfCancellationRequested();
+
         return await TaskRepository.GetAllAsync(cancellationToken);
     }
 }
