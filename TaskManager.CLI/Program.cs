@@ -24,7 +24,17 @@ while (true)
     var choice = AnsiConsole.Prompt(
         new SelectionPrompt<string>()
             .Title("What would you like to do?")
-            .AddChoices(["Create Task", "List All Tasks", "Exit"])
+            .AddChoices(
+                [
+                    "Create Task",
+                    "List All Tasks",
+                    "View Task by ID",
+                    "Complete Task",
+                    "Update Task",
+                    "Delete Task",
+                    "Exit",
+                ]
+            )
     );
 
     switch (choice)
@@ -34,6 +44,18 @@ while (true)
             break;
         case "List All Tasks":
             await ListAllTasks(mediator);
+            break;
+        case "View Task by ID":
+            await ViewTaskById(mediator);
+            break;
+        case "Complete Task":
+            await CompleteTask(mediator);
+            break;
+        case "Update Task":
+            await UpdateTask(mediator);
+            break;
+        case "Delete Task":
+            await DeleteTask(mediator);
             break;
         case "Exit":
             return;
@@ -82,27 +104,156 @@ async Task ListAllTasks(IMediator mediator)
         return;
     }
 
-    var table = new Table();
-    table.AddColumn("Title");
-    table.AddColumn("Description");
-    table.AddColumn("Priority");
-    table.AddColumn("Status");
-    table.AddColumn("Tags");
-    table.AddColumn("Due Date");
+    var taskList = tasks.ToList();
+    var taskDict = new Dictionary<string, Guid>();
+    var choices = new List<string>();
 
-    table.Centered();
-
-    foreach (var task in tasks)
+    foreach (var task in taskList)
     {
-        table.AddRow(
-            new Text(task.Title),
-            new Text(task.Description ?? ""),
-            new Text(task.Priority.ToString()).Justify(Justify.Center),
-            new Markup(task.IsCompleted ? "[green]✓[/]" : "[grey]○[/]").Justify(Justify.Center),
-            new Text(task.Tags.Any() ? string.Join(", ", task.Tags) : ""),
-            new Text(task.DueDate?.ToString("dd/MM/yy") ?? "-")
-        );
+        var displayText =
+            $"{(task.IsCompleted ? "✓" : "○")} {task.Title.EscapeMarkup()} ({task.Priority})";
+        choices.Add(displayText);
+        taskDict[displayText] = task.Id;
     }
 
-    AnsiConsole.Write(table);
+    var selectedTask = AnsiConsole.Prompt(
+        new SelectionPrompt<string>()
+            .Title("Select a task to copy its ID:")
+            .PageSize(10)
+            .AddChoices(choices)
+    );
+
+    var selectedId = taskDict[selectedTask];
+
+    AnsiConsole.MarkupLine($"\n[green]Task ID:[/] [yellow]{selectedId}[/]\n");
+}
+
+async Task ViewTaskById(IMediator mediator)
+{
+    var taskId = AnsiConsole.Ask<Guid>("Enter Task ID:");
+
+    var task = await mediator.Send(new GetTaskByIdQuery(taskId));
+
+    if (task == null)
+    {
+        AnsiConsole.MarkupLine("[red]✗[/] Task not found.");
+        return;
+    }
+
+    var panel = new Panel(
+        new Markup(
+            $"""
+            [bold]Title:[/] {task.Title}
+            [bold]Description:[/] {task.Description ?? "N/A"}
+            [bold]Priority:[/] {task.Priority}
+            [bold]Status:[/] {(
+                task.IsCompleted ? "[green]Completed ✓[/]" : "[grey]Incomplete ○[/]"
+            )}
+            [bold]Tags:[/] {(task.Tags.Any() ? string.Join(", ", task.Tags) : "None")}
+            [bold]Due Date:[/] {task.DueDate?.ToString("dd/MM/yyyy") ?? "N/A"}
+            [bold]Created At:[/] {task.CreatedAt:dd/MM/yyyy HH:mm}
+            """
+        )
+    )
+    {
+        Header = new PanelHeader($"Task: {taskId}"),
+        Border = BoxBorder.Rounded,
+    };
+
+    AnsiConsole.Write(panel);
+}
+
+async Task CompleteTask(IMediator mediator)
+{
+    var taskId = AnsiConsole.Ask<Guid>("Enter Task ID to complete:");
+
+    try
+    {
+        await mediator.Send(new CompleteTaskCommand(taskId));
+        AnsiConsole.MarkupLine("[green]✓[/] Task marked as completed.");
+    }
+    catch (KeyNotFoundException ex)
+    {
+        AnsiConsole.MarkupLine($"[red]✗[/] {ex.Message}");
+    }
+}
+
+async Task UpdateTask(IMediator mediator)
+{
+    var taskId = AnsiConsole.Ask<Guid>("Enter Task ID to update:");
+
+    var task = await mediator.Send(new GetTaskByIdQuery(taskId));
+    if (task == null)
+    {
+        AnsiConsole.MarkupLine("[red]✗[/] Task not found.");
+        return;
+    }
+
+    AnsiConsole.MarkupLine(
+        $"[dim]Current values shown in brackets. Press Enter to keep current value.[/]"
+    );
+
+    var title = AnsiConsole.Confirm("Update title?")
+        ? AnsiConsole.Ask<string>($"New Title ({task.Title.EscapeMarkup()}):", task.Title)
+        : task.Title;
+
+    var description = AnsiConsole.Confirm("Update description?")
+        ? AnsiConsole.Ask<string>(
+            $"New Description ({(task.Description ?? "N/A").EscapeMarkup()}):",
+            task.Description ?? ""
+        )
+        : task.Description;
+
+    var priority = AnsiConsole.Confirm("Update priority?")
+        ? AnsiConsole.Prompt(
+            new SelectionPrompt<TaskPriority>()
+                .Title($"Select Priority (Current: {task.Priority}):")
+                .AddChoices(Enum.GetValues<TaskPriority>())
+        )
+        : task.Priority;
+
+    var tags = task.Tags;
+    if (AnsiConsole.Confirm("Update tags?"))
+    {
+        var tagsDisplay = task.Tags.Any() ? string.Join(", ", task.Tags) : "None";
+        var tagInput = AnsiConsole.Ask<string>(
+            $"Enter tags (comma-separated) ({tagsDisplay.EscapeMarkup()}):",
+            string.Join(", ", task.Tags)
+        );
+        tags = tagInput.Split(',').Select(t => t.Trim()).ToList();
+    }
+
+    var dueDate = task.DueDate;
+    if (AnsiConsole.Confirm("Update due date?"))
+    {
+        var dueDateDisplay = task.DueDate?.ToString("dd/MM/yyyy") ?? "N/A";
+        dueDate = AnsiConsole.Ask<DateTime?>($"New Due Date ({dueDateDisplay}):");
+    }
+
+    try
+    {
+        await mediator.Send(
+            new UpdateTaskCommand(taskId, title, description, tags, dueDate, priority)
+        );
+        AnsiConsole.MarkupLine("[green]✓[/] Task updated successfully.");
+    }
+    catch (KeyNotFoundException ex)
+    {
+        AnsiConsole.MarkupLine($"[red]✗[/] {ex.Message}");
+    }
+}
+
+async Task DeleteTask(IMediator mediator)
+{
+    var taskId = AnsiConsole.Ask<Guid>("Enter Task ID to delete:");
+
+    var confirm = AnsiConsole.Confirm($"Are you sure you want to delete task {taskId}?");
+    if (!confirm)
+    {
+        AnsiConsole.MarkupLine("[yellow]Delete cancelled.[/]");
+        return;
+    }
+
+    await mediator.Send(new DeleteTaskCommand(taskId));
+    AnsiConsole.MarkupLine("[green]✓[/] Task deleted successfully.");
 }
