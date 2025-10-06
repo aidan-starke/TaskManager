@@ -1,4 +1,5 @@
 using MediatR;
+using TaskManager.Application.Extensions;
 using TaskManager.Application.Interfaces;
 using TaskManager.Application.Queries;
 using TaskManager.Domain;
@@ -14,29 +15,14 @@ public class FilterTasksQueryHandler(ITaskRepository TaskRepository)
     )
     {
         cancellationToken.ThrowIfCancellationRequested();
-        IEnumerable<TaskItem> query = await TaskRepository.GetAllAsync(cancellationToken);
 
-        if (!string.IsNullOrEmpty(request.Title))
-            query = query.Where(t => t.Title.Contains(request.Title));
-
-        if (!string.IsNullOrEmpty(request.Description))
-            query = query.Where(t => t.Description?.Contains(request.Description) ?? false);
-
-        if (request.IsCompleted != null)
-            query = query.Where(t => t.IsCompleted == request.IsCompleted);
-
-        if (request.Priority != null)
-            query = query.Where(t => t.Priority == request.Priority);
-
-        if (request.Tags != null)
-            query = query.Where(t => t.Tags.Intersect(request.Tags).Any());
-
-        if (request.DueBefore != null)
-            query = query.Where(t => t.DueDate <= request.DueBefore);
-
-        if (request.DueAfter != null)
-            query = query.Where(t => t.DueDate >= request.DueAfter);
-
-        return query;
+        return (await TaskRepository.GetAllAsync(cancellationToken))
+            .WhereTitle(request.Title)
+            .WhereDescription(request.Description)
+            .WhereCompleted(request.IsCompleted)
+            .WherePriority(request.Priority)
+            .WhereTags(request.Tags)
+            .WhereDueBefore(request.DueBefore)
+            .WhereDueAfter(request.DueAfter);
     }
 }
