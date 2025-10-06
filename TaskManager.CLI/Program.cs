@@ -34,6 +34,7 @@ while (true)
                     "Complete Task",
                     "Update Task",
                     "Delete Task",
+                    "Search Tasks",
                     "Filter Tasks",
                     "Export Tasks",
                     "Exit",
@@ -60,6 +61,9 @@ while (true)
             break;
         case "Delete Task":
             await DeleteTask(mediator);
+            break;
+        case "Search Tasks":
+            await SearchTasks(mediator);
             break;
         case "Filter Tasks":
             await FilterTasks(mediator);
@@ -271,6 +275,15 @@ async Task DeleteTask(IMediator mediator)
 
     await mediator.Send(new DeleteTaskCommand(taskId));
     AnsiConsole.MarkupLine("[green]✓[/] Task deleted successfully.");
+}
+
+async Task SearchTasks(IMediator mediator)
+{
+    var searchTerm = AnsiConsole.Ask<string>("Enter search term:");
+
+    var result = await mediator.Send(new SearchTasksQuery(searchTerm));
+
+    DisplayTasks(result);
 }
 
 async Task FilterTasks(IMediator mediator)
