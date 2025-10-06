@@ -41,11 +41,13 @@ public class JsonTaskRepository : ITaskRepository
         return TaskItems.Value;
     }
 
-    public async Task AddAsync(TaskItem task, CancellationToken cancellationToken = default)
+    public async Task<Guid> AddAsync(TaskItem task, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
         TaskItems.Value.Add(task);
+
+        return task.Id;
     }
 
     public async Task UpdateAsync(TaskItem task, CancellationToken cancellationToken = default)

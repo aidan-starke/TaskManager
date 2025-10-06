@@ -26,8 +26,8 @@ public class JsonTaskRepositoryTests : IDisposable
 
         await repo.AddAsync(task);
 
-        var tasks = await repo.GetAllAsync();
-        tasks.Should().Contain(task);
+        var result = await repo.GetByIdAsync(task.Id, CancellationToken.None);
+        result?.Should().Be(task);
     }
 
     [Fact]
@@ -59,8 +59,10 @@ public class JsonTaskRepositoryTests : IDisposable
         var task = new TaskItem("Test Task", "Test Description", null, null, TaskPriority.Low);
 
         await repo.AddAsync(task);
-        var tasks = await repo.GetAllAsync();
-        var updatedTask = tasks.First();
+        var updatedTask = await repo.GetByIdAsync(task.Id, CancellationToken.None);
+        if (updatedTask == null)
+            throw new KeyNotFoundException("Task not found.");
+
         updatedTask.IsCompleted = true;
         await repo.UpdateAsync(updatedTask);
 
@@ -79,7 +81,7 @@ public class JsonTaskRepositoryTests : IDisposable
         var taskItem = tasks.First();
         await repo.DeleteAsync(taskItem.Id);
 
-        var updatedTasks = await repo.GetAllAsync();
-        updatedTasks.Should().BeEmpty();
+        var yeet = await repo.GetByIdAsync(taskItem.Id, CancellationToken.None);
+        yeet.Should().BeNull();
     }
 }

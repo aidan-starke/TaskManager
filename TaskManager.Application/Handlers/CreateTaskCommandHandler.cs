@@ -20,9 +20,9 @@ public class CreateTaskCommandHandler(ITaskRepository TaskRepository)
             request.Priority
         );
 
-        await TaskRepository.AddAsync(task, cancellationToken);
+        Guid id = await TaskRepository.AddAsync(task, cancellationToken);
         await TaskRepository.SaveChangesAsync(cancellationToken);
 
-        return task.Id;
+        return id;
     }
 }

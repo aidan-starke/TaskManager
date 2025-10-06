@@ -8,7 +8,7 @@ public interface ITaskRepository
 
     Task<IEnumerable<TaskItem>> GetAllAsync(CancellationToken cancellationToken = default);
 
-    Task AddAsync(TaskItem task, CancellationToken cancellationToken = default);
+    Task<Guid> AddAsync(TaskItem task, CancellationToken cancellationToken = default);
 
     Task UpdateAsync(TaskItem task, CancellationToken cancellationToken = default);
 
