@@ -4,7 +4,7 @@ using TaskManager.Application.Handlers;
 using TaskManager.Application.Queries;
 using TaskManager.Domain;
 
-namespace TaskManager.Tests;
+namespace TaskManager.Tests.Queries;
 
 public class FilterTasksQueryHandlerTests : TaskCommandTestBase
 {

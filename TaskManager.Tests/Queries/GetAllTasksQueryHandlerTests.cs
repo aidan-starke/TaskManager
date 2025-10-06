@@ -5,7 +5,7 @@ using TaskManager.Application.Interfaces;
 using TaskManager.Application.Queries;
 using TaskManager.Domain;
 
-namespace TaskManager.Tests;
+namespace TaskManager.Tests.Queries;
 
 public class GetAllTasksQueryHandlerTests
 {

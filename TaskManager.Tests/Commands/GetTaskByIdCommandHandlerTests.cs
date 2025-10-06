@@ -3,7 +3,7 @@ using Moq;
 using TaskManager.Application.Handlers;
 using TaskManager.Application.Queries;
 
-namespace TaskManager.Tests;
+namespace TaskManager.Tests.Commands;
 
 public class GetTaskByIdQueryHandlerTests : TaskCommandTestBase
 {

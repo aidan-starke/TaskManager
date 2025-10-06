@@ -340,7 +340,7 @@ async Task ExportTasks(IMediator mediator)
     string? selectedFormat = AnsiConsole.Prompt(
         new SelectionPrompt<string>()
             .Title("Select a format:")
-            .AddChoices(["CSV", "JSON", "Markdown"])
+            .AddChoices(new[] { "CSV", "JSON", "Markdown" })
     );
 
     if (string.IsNullOrEmpty(selectedFormat))

@@ -5,7 +5,7 @@ using TaskManager.Application.Handlers;
 using TaskManager.Application.Interfaces;
 using TaskManager.Domain;
 
-namespace TaskManager.Tests;
+namespace TaskManager.Tests.Commands;
 
 public class CompleteTaskCommandHandlerTests : TaskCommandTestBase
 {

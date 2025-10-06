@@ -3,7 +3,7 @@ using Moq;
 using TaskManager.Application.Commands;
 using TaskManager.Application.Handlers;
 
-namespace TaskManager.Tests;
+namespace TaskManager.Tests.Commands;
 
 public class DeleteTaskCommandHandlerTests : TaskCommandTestBase
 {
