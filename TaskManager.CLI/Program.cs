@@ -333,8 +333,30 @@ async Task FilterTasks(IMediator mediator)
         dueAfter = AnsiConsole.Ask<DateTime?>($"Enter Earliest Date ({dueDateDisplay}):");
     }
 
+    TaskSortField? sortField = null;
+    if (AnsiConsole.Confirm("Sort by field?"))
+    {
+        sortField = AnsiConsole.Prompt(
+            new SelectionPrompt<TaskSortField>()
+                .Title("Enter Sort Field:")
+                .AddChoices(Enum.GetValues<TaskSortField>())
+        );
+    }
+
+    bool descending = AnsiConsole.Confirm("Sort in descending order?");
+
     var result = await mediator.Send(
-        new FilterTasksQuery(title, description, isCompleted, priority, tags, dueBefore, dueAfter)
+        new FilterTasksQuery(
+            title,
+            description,
+            isCompleted,
+            priority,
+            tags,
+            dueBefore,
+            dueAfter,
+            sortField,
+            descending
+        )
     );
 
     DisplayTasks(result);

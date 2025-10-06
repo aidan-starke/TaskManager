@@ -23,6 +23,7 @@ public class FilterTasksQueryHandler(ITaskRepository TaskRepository)
             .WherePriority(request.Priority)
             .WhereTags(request.Tags)
             .WhereDueBefore(request.DueBefore)
-            .WhereDueAfter(request.DueAfter);
+            .WhereDueAfter(request.DueAfter)
+            .OrderBy(request.SortBy, request.SortDescending);
     }
 }

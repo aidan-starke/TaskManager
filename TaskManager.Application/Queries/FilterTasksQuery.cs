@@ -10,5 +10,7 @@ public record FilterTasksQuery(
     TaskPriority? Priority = null,
     List<string>? Tags = null,
     DateTime? DueBefore = null,
-    DateTime? DueAfter = null
+    DateTime? DueAfter = null,
+    TaskSortField? SortBy = null,
+    bool SortDescending = false
 ) : IRequest<IEnumerable<TaskItem>>;

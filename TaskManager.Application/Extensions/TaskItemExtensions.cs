@@ -46,4 +46,26 @@ public static class TaskItemExtensions
         this IEnumerable<TaskItem> tasks,
         DateTime? dueAfter
     ) => dueAfter is not null ? tasks.Where(t => t.DueDate >= dueAfter) : tasks;
+
+    public static IEnumerable<TaskItem> OrderBy(
+        this IEnumerable<TaskItem> tasks,
+        TaskSortField? sortField,
+        bool descending = false
+    )
+    {
+        if (sortField is null)
+            return descending ? tasks.Reverse() : tasks;
+
+        var ordered = sortField switch
+        {
+            TaskSortField.Title => tasks.OrderBy(t => t.Title, StringComparer.OrdinalIgnoreCase),
+            TaskSortField.Priority => tasks.OrderBy(t => t.Priority),
+            TaskSortField.DueDate => tasks.OrderBy(t => t.DueDate),
+            TaskSortField.CreatedAt => tasks.OrderBy(t => t.CreatedAt),
+            TaskSortField.IsCompleted => tasks.OrderBy(t => t.IsCompleted),
+            _ => tasks,
+        };
+
+        return descending ? ordered.Reverse() : ordered;
+    }
 }
