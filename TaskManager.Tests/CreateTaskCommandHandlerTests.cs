@@ -44,7 +44,7 @@ public class CreateTaskCommandHandlerTests
     }
 
     [Fact]
-    public async Task Handle_ShouldCancelTask()
+    public async Task Handle_ShouldCancel()
     {
         var mockRepo = new Mock<ITaskRepository>();
         var handler = new CreateTaskCommandHandler(mockRepo.Object);

@@ -24,7 +24,7 @@ public class UpdateTaskCommandHandlerTests : TaskCommandTestBase
 
         MockRepo.Verify(
             r =>
-                r.AddAsync(
+                r.UpdateAsync(
                     It.Is<TaskItem>(t => t.Title == "Test Task Updated"),
                     It.IsAny<CancellationToken>()
                 ),
@@ -34,7 +34,7 @@ public class UpdateTaskCommandHandlerTests : TaskCommandTestBase
     }
 
     [Fact]
-    public async Task Handle_ShouldCancelTask()
+    public async Task Handle_ShouldCancel()
     {
         var command = new UpdateTaskCommand(TestTaskId, "Test Task Updated", null, null, null);
 
@@ -51,6 +51,6 @@ public class UpdateTaskCommandHandlerTests : TaskCommandTestBase
         var command = new UpdateTaskCommand(Guid.NewGuid(), "Non-existent Task", null, null, null);
 
         var act = async () => await _handler.Handle(command, CancellationToken.None);
-        await act.Should().ThrowAsync<OperationCanceledException>();
+        await act.Should().ThrowAsync<KeyNotFoundException>();
     }
 }

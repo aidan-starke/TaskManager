@@ -44,7 +44,7 @@ public class CompleteTaskCommandHandlerTests : TaskCommandTestBase
     }
 
     [Fact]
-    public async Task Handle_ShouldCancelTask()
+    public async Task Handle_ShouldCancel()
     {
         var command = new CompleteTaskCommand(TestTaskId);
 
