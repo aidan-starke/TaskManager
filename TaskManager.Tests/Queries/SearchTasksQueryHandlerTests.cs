@@ -1,55 +1,16 @@
 using FluentAssertions;
-using Moq;
 using TaskManager.Application.Handlers;
 using TaskManager.Application.Queries;
-using TaskManager.Domain;
 
 namespace TaskManager.Tests.Queries;
 
-public class SearchTasksQueryHandlerTests : TaskCommandTestBase
+public class SearchTasksQueryHandlerTests : TaskQueryTestBase
 {
     private readonly SearchTasksQueryHandler _handler;
-    private readonly List<TaskItem> _testTasks;
 
     public SearchTasksQueryHandlerTests()
     {
         _handler = new SearchTasksQueryHandler(MockRepo.Object);
-
-        _testTasks =
-        [
-            new TaskItem(
-                "Buy groceries",
-                "Get milk and eggs",
-                ["shopping", "urgent"],
-                DateTime.Now.AddDays(1),
-                TaskPriority.High
-            ),
-            new TaskItem(
-                "Write report",
-                "Complete quarterly report",
-                ["work", "documents"],
-                DateTime.Now.AddDays(7),
-                TaskPriority.Medium
-            ),
-            new TaskItem(
-                "Call dentist",
-                "Schedule appointment",
-                ["health", "urgent"],
-                DateTime.Now.AddDays(-1),
-                TaskPriority.Low
-            ),
-            new TaskItem(
-                "Grocery shopping",
-                "Weekly shopping",
-                ["shopping"],
-                null,
-                TaskPriority.Medium
-            ),
-        ];
-
-        _testTasks[2].IsCompleted = true;
-
-        MockRepo.Setup(r => r.GetAllAsync(It.IsAny<CancellationToken>())).ReturnsAsync(_testTasks);
     }
 
     [Fact]
@@ -60,7 +21,7 @@ public class SearchTasksQueryHandlerTests : TaskCommandTestBase
         var result = await _handler.Handle(query, CancellationToken.None);
 
         result.Should().HaveCount(4);
-        result.Should().BeEquivalentTo(_testTasks);
+        result.Should().BeEquivalentTo(TestTasks);
     }
 
     [Fact]
