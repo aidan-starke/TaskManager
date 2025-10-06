@@ -11,7 +11,7 @@ public class DeleteTaskCommandHandler(ITaskRepository TaskRepository)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        await TaskRepository.DeleteAsync(request.id, cancellationToken);
+        await TaskRepository.DeleteAsync(request.Id, cancellationToken);
         await TaskRepository.SaveChangesAsync(cancellationToken);
 
         return Unit.Value;

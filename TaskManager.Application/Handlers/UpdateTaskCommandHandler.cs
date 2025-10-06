@@ -12,9 +12,9 @@ public class UpdateTaskCommandHandler(ITaskRepository TaskRepository)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        TaskItem? task = await TaskRepository.GetByIdAsync(request.id, cancellationToken);
+        TaskItem? task = await TaskRepository.GetByIdAsync(request.Id, cancellationToken);
         if (task == null)
-            throw new KeyNotFoundException($"Task with id {request.id} not found");
+            throw new KeyNotFoundException($"Task with id {request.Id} not found");
 
         task.Title = request.Title ?? task.Title;
         task.Description = request.Description ?? task.Description;

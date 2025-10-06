@@ -2,4 +2,4 @@ using MediatR;
 
 namespace TaskManager.Application.Commands;
 
-public record DeleteTaskCommand(Guid id) : IRequest<Unit>;
+public record DeleteTaskCommand(Guid Id) : IRequest<Unit>;

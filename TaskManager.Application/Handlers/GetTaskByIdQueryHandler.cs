@@ -8,10 +8,13 @@ namespace TaskManager.Application.Handlers;
 public class GetTaskByIdQueryHandler(ITaskRepository TaskRepository)
     : IRequestHandler<GetTaskByIdQuery, TaskItem?>
 {
-    public async Task<TaskItem?> Handle(GetTaskByIdQuery request, CancellationToken cancellationToken)
+    public async Task<TaskItem?> Handle(
+        GetTaskByIdQuery request,
+        CancellationToken cancellationToken
+    )
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        return await TaskRepository.GetByIdAsync(request.id, cancellationToken);
+        return await TaskRepository.GetByIdAsync(request.Id, cancellationToken);
     }
 }

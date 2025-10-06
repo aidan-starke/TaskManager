@@ -3,4 +3,4 @@ using TaskManager.Domain;
 
 namespace TaskManager.Application.Queries;
 
-public record GetTaskByIdQuery(Guid id) : IRequest<TaskItem?>;
+public record GetTaskByIdQuery(Guid Id) : IRequest<TaskItem?>;
