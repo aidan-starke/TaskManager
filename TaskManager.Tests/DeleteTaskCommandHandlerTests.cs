@@ -2,8 +2,6 @@
 using Moq;
 using TaskManager.Application.Commands;
 using TaskManager.Application.Handlers;
-using TaskManager.Application.Interfaces;
-using TaskManager.Domain;
 
 namespace TaskManager.Tests;
 
