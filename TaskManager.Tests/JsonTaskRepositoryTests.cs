@@ -61,7 +61,7 @@ public class JsonTaskRepositoryTests : IDisposable
         await repo.AddAsync(task);
         var updatedTask = await repo.GetByIdAsync(task.Id, CancellationToken.None);
         if (updatedTask == null)
-            throw new KeyNotFoundException("Task not found.");
+            throw new KeyNotFoundException($"Task with id {task.Id} not found");
 
         updatedTask.IsCompleted = true;
         await repo.UpdateAsync(updatedTask);
