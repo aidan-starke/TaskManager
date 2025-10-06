@@ -4,7 +4,9 @@ using Spectre.Console;
 using TaskManager.Application.Commands;
 using TaskManager.Application.Interfaces;
 using TaskManager.Application.Queries;
+using TaskManager.Application.Services;
 using TaskManager.Domain;
+using TaskManager.Infrastructure.Export;
 using TaskManager.Infrastructure.Repositories;
 
 var services = new ServiceCollection();
@@ -33,6 +35,7 @@ while (true)
                     "Update Task",
                     "Delete Task",
                     "Filter Tasks",
+                    "Export Tasks",
                     "Exit",
                 ]
             )
@@ -60,6 +63,9 @@ while (true)
             break;
         case "Filter Tasks":
             await FilterTasks(mediator);
+            break;
+        case "Export Tasks":
+            await ExportTasks(mediator);
             break;
         case "Exit":
             return;
@@ -319,4 +325,42 @@ async Task FilterTasks(IMediator mediator)
     );
 
     DisplayTasks(result);
+}
+
+async Task ExportTasks(IMediator mediator)
+{
+    var tasks = await mediator.Send(new GetAllTasksQuery());
+
+    if (!tasks.Any())
+    {
+        AnsiConsole.MarkupLine("[yellow]No tasks found.[/]");
+        return;
+    }
+
+    string? selectedFormat = AnsiConsole.Prompt(
+        new SelectionPrompt<string>()
+            .Title("Select a format:")
+            .AddChoices(["CSV", "JSON", "Markdown"])
+    );
+
+    if (string.IsNullOrEmpty(selectedFormat))
+    {
+        AnsiConsole.MarkupLine("[yellow]Export cancelled.[/]");
+        return;
+    }
+
+    var fileName = AnsiConsole.Ask<string>("Enter a file name:");
+    var service = new ExportService(fileName);
+
+    IExportStrategy exportStrategy = selectedFormat switch
+    {
+        "CSV" => new CsvExportStrategy(),
+        "JSON" => new JsonExportStrategy(),
+        "Markdown" => new MarkdownExportStrategy(),
+        _ => throw new ArgumentOutOfRangeException(),
+    };
+
+    await service.ExportTasksAysnc(tasks, exportStrategy, CancellationToken.None);
+
+    AnsiConsole.MarkupLine("[green]✓[/] Tasks exported successfully.");
 }
