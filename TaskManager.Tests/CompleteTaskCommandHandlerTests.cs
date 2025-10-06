@@ -7,33 +7,23 @@ using TaskManager.Domain;
 
 namespace TaskManager.Tests;
 
-public class CompleteTaskCommandHandlerTests
+public class CompleteTaskCommandHandlerTests : TaskCommandTestBase
 {
-    private readonly Mock<ITaskRepository> _mockRepo;
     private readonly CompleteTaskCommandHandler _handler;
-    private readonly Guid _testTaskId;
-    private readonly TaskItem _testTask;
 
     public CompleteTaskCommandHandlerTests()
     {
-        _mockRepo = new Mock<ITaskRepository>();
-        _handler = new CompleteTaskCommandHandler(_mockRepo.Object);
-        _testTask = new TaskItem("Test Task", "Test Description", null, null, TaskPriority.Low);
-        _testTaskId = _testTask.Id;
-
-        _mockRepo
-            .Setup(r => r.GetByIdAsync(_testTaskId, It.IsAny<CancellationToken>()))
-            .ReturnsAsync(_testTask);
+        _handler = new CompleteTaskCommandHandler(MockRepo.Object);
     }
 
     [Fact]
     public async Task Handle_ShouldCompleteTask()
     {
-        var command = new CompleteTaskCommand(_testTaskId, true);
+        var command = new CompleteTaskCommand(TestTaskId, true);
 
         await _handler.Handle(command, CancellationToken.None);
 
-        _mockRepo.Verify(
+        MockRepo.Verify(
             r =>
                 r.UpdateAsync(
                     It.Is<TaskItem>(t => t.IsCompleted == true),
@@ -41,7 +31,7 @@ public class CompleteTaskCommandHandlerTests
                 ),
             Times.Once
         );
-        _mockRepo.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
+        MockRepo.Verify(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -56,7 +46,7 @@ public class CompleteTaskCommandHandlerTests
     [Fact]
     public async Task Handle_ShouldCancelTask()
     {
-        var command = new CompleteTaskCommand(_testTaskId);
+        var command = new CompleteTaskCommand(TestTaskId);
 
         var tokenSource = new CancellationTokenSource();
         tokenSource.Cancel();
