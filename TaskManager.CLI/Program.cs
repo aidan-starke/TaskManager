@@ -32,6 +32,7 @@ while (true)
                     "Complete Task",
                     "Update Task",
                     "Delete Task",
+                    "Filter Tasks",
                     "Exit",
                 ]
             )
@@ -56,6 +57,9 @@ while (true)
             break;
         case "Delete Task":
             await DeleteTask(mediator);
+            break;
+        case "Filter Tasks":
+            await FilterTasks(mediator);
             break;
         case "Exit":
             return;
@@ -94,10 +98,8 @@ async Task CreateTask(IMediator mediator)
     AnsiConsole.MarkupLine($"[green]✓[/] Task created with ID: {taskId}");
 }
 
-async Task ListAllTasks(IMediator mediator)
+void DisplayTasks(IEnumerable<TaskItem> tasks)
 {
-    var tasks = await mediator.Send(new GetAllTasksQuery());
-
     if (!tasks.Any())
     {
         AnsiConsole.MarkupLine("[yellow]No tasks found.[/]");
@@ -126,6 +128,13 @@ async Task ListAllTasks(IMediator mediator)
     var selectedId = taskDict[selectedTask];
 
     AnsiConsole.MarkupLine($"\n[green]Task ID:[/] [yellow]{selectedId}[/]\n");
+}
+
+async Task ListAllTasks(IMediator mediator)
+{
+    var tasks = await mediator.Send(new GetAllTasksQuery());
+
+    DisplayTasks(tasks);
 }
 
 async Task ViewTaskById(IMediator mediator)
@@ -256,4 +265,58 @@ async Task DeleteTask(IMediator mediator)
 
     await mediator.Send(new DeleteTaskCommand(taskId));
     AnsiConsole.MarkupLine("[green]✓[/] Task deleted successfully.");
+}
+
+async Task FilterTasks(IMediator mediator)
+{
+    var title = AnsiConsole.Confirm("Filter title?")
+        ? AnsiConsole.Ask<string>("Enter Title:")
+        : null;
+
+    var description = AnsiConsole.Confirm("Filter description?")
+        ? AnsiConsole.Ask<string>("Enter Description:")
+        : null;
+
+    bool? isCompleted = AnsiConsole.Confirm("Filter isCompleted?")
+        ? AnsiConsole.Prompt(
+            new SelectionPrompt<bool>()
+                .Title("Enter isCompleted:")
+                .AddChoices(new[] { true, false })
+        )
+        : null;
+
+    TaskPriority? priority = AnsiConsole.Confirm("Filter priority?")
+        ? AnsiConsole.Prompt(
+            new SelectionPrompt<TaskPriority>()
+                .Title("Enter priority:")
+                .AddChoices(Enum.GetValues<TaskPriority>())
+        )
+        : null;
+
+    List<string>? tags = null;
+    if (AnsiConsole.Confirm("Filter tags?"))
+    {
+        var tagInput = AnsiConsole.Ask<string>("Enter tags (comma-separated):");
+        tags = tagInput.Split(',').Select(t => t.Trim()).ToList();
+    }
+
+    DateTime? dueBefore = null;
+    if (AnsiConsole.Confirm("Filter due before date?"))
+    {
+        var dueDateDisplay = DateTime.Now.ToString("dd/MM/yyyy");
+        dueBefore = AnsiConsole.Ask<DateTime?>($"Enter Latest Date ({dueDateDisplay}):");
+    }
+
+    DateTime? dueAfter = null;
+    if (AnsiConsole.Confirm("Filter due after date?"))
+    {
+        var dueDateDisplay = DateTime.Now.ToString("dd/MM/yyyy");
+        dueAfter = AnsiConsole.Ask<DateTime?>($"Enter Earliest Date ({dueDateDisplay}):");
+    }
+
+    var result = await mediator.Send(
+        new FilterTasksQuery(title, description, isCompleted, priority, tags, dueBefore, dueAfter)
+    );
+
+    DisplayTasks(result);
 }
