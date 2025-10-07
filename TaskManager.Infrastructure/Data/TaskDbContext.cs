@@ -30,12 +30,19 @@ public class TaskDbContext : DbContext
 
             entity.Property(e => e.IsCompleted).IsRequired();
 
-            // Store Tags as JSON
+            // Store Tags as comma-separated string
             entity
                 .Property(e => e.Tags)
                 .HasConversion(
                     v => string.Join(',', v),
                     v => v.Split(',', StringSplitOptions.RemoveEmptyEntries).ToList()
+                )
+                .Metadata.SetValueComparer(
+                    new Microsoft.EntityFrameworkCore.ChangeTracking.ValueComparer<List<string>>(
+                        (c1, c2) => c1!.SequenceEqual(c2!),
+                        c => c.Aggregate(0, (a, v) => HashCode.Combine(a, v.GetHashCode())),
+                        c => c.ToList()
+                    )
                 );
         });
     }
