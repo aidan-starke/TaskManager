@@ -71,9 +71,16 @@ public class TasksController(IMediator mediator) : ControllerBase
     }
 
     [HttpPut("{id:guid}/complete")]
-    public async Task<IActionResult> CompleteTask(Guid id, CancellationToken cancellationToken)
+    public async Task<IActionResult> CompleteTask(
+        Guid id,
+        bool isCompleted,
+        CancellationToken cancellationToken
+    )
     {
-        var result = await mediator.Send(new CompleteTaskCommand(id), cancellationToken);
+        var result = await mediator.Send(
+            new CompleteTaskCommand(id, isCompleted),
+            cancellationToken
+        );
         if (result.IsFailed)
             return NotFound(result.Errors[0].Message);
 

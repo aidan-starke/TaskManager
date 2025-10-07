@@ -489,3 +489,6 @@ tasks.json
 *.db
 *.db-shm
 *.db-wal
+
+# Launch settings (contains license keys and local config)
+**/Properties/launchSettings.json
