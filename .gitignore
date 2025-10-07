@@ -484,3 +484,8 @@ $RECYCLE.BIN/
 *.swp
 
 tasks.json
+
+# SQLite database files
+*.db
+*.db-shm
+*.db-wal
