@@ -21,8 +21,9 @@ public class CompleteTaskCommandHandlerTests : TaskCommandTestBase
     {
         var command = new CompleteTaskCommand(TestTaskId, true);
 
-        await _handler.Handle(command, CancellationToken.None);
+        var result = await _handler.Handle(command, CancellationToken.None);
 
+        result.IsSuccess.Should().BeTrue();
         MockRepo.Verify(
             r =>
                 r.UpdateAsync(
@@ -35,12 +36,19 @@ public class CompleteTaskCommandHandlerTests : TaskCommandTestBase
     }
 
     [Fact]
-    public async Task Handle_ShouldThrowException_WhenTaskNotFound()
+    public async Task Handle_ShouldReturnFailure_WhenTaskNotFound()
     {
-        var command = new CompleteTaskCommand(Guid.NewGuid());
-        var act = async () => await _handler.Handle(command, CancellationToken.None);
+        var taskId = Guid.NewGuid();
+        var command = new CompleteTaskCommand(taskId);
 
-        await act.Should().ThrowAsync<KeyNotFoundException>();
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        result.IsFailed.Should().BeTrue();
+        result
+            .Errors.Should()
+            .ContainSingle()
+            .Which.Message.Should()
+            .Be($"Task with id {taskId} not found");
     }
 
     [Fact]

@@ -20,8 +20,9 @@ public class UpdateTaskCommandHandlerTests : TaskCommandTestBase
     {
         var command = new UpdateTaskCommand(TestTaskId, "Test Task Updated", null, null, null);
 
-        await _handler.Handle(command, CancellationToken.None);
+        var result = await _handler.Handle(command, CancellationToken.None);
 
+        result.IsSuccess.Should().BeTrue();
         MockRepo.Verify(
             r =>
                 r.UpdateAsync(
@@ -46,11 +47,18 @@ public class UpdateTaskCommandHandlerTests : TaskCommandTestBase
     }
 
     [Fact]
-    public async Task Handle_ShouldThrowException_WhenTaskNotFound()
+    public async Task Handle_ShouldReturnFailure_WhenTaskNotFound()
     {
-        var command = new UpdateTaskCommand(Guid.NewGuid(), "Non-existent Task", null, null, null);
+        var taskId = Guid.NewGuid();
+        var command = new UpdateTaskCommand(taskId, "Non-existent Task", null, null, null);
 
-        var act = async () => await _handler.Handle(command, CancellationToken.None);
-        await act.Should().ThrowAsync<KeyNotFoundException>();
+        var result = await _handler.Handle(command, CancellationToken.None);
+
+        result.IsFailed.Should().BeTrue();
+        result
+            .Errors.Should()
+            .ContainSingle()
+            .Which.Message.Should()
+            .Be($"Task with id {taskId} not found");
     }
 }

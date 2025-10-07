@@ -1,4 +1,5 @@
-﻿using MediatR;
+﻿using FluentResults;
+using MediatR;
 using Microsoft.Extensions.DependencyInjection;
 using Spectre.Console;
 using TaskManager.Application.Commands;
@@ -186,15 +187,11 @@ async Task CompleteTask(IMediator mediator)
 {
     var taskId = AnsiConsole.Ask<Guid>("Enter Task ID to complete:");
 
-    try
-    {
-        await mediator.Send(new CompleteTaskCommand(taskId));
+    var result = await mediator.Send(new CompleteTaskCommand(taskId));
+    if (result.IsSuccess)
         AnsiConsole.MarkupLine("[green]✓[/] Task marked as completed.");
-    }
-    catch (KeyNotFoundException ex)
-    {
-        AnsiConsole.MarkupLine($"[red]✗[/] {ex.Message}");
-    }
+    else
+        AnsiConsole.MarkupLine($"[red]✗[/] {result.Errors[0].Message}");
 }
 
 async Task UpdateTask(IMediator mediator)
@@ -249,17 +246,13 @@ async Task UpdateTask(IMediator mediator)
         dueDate = AnsiConsole.Ask<DateTime?>($"New Due Date ({dueDateDisplay}):");
     }
 
-    try
-    {
-        await mediator.Send(
-            new UpdateTaskCommand(taskId, title, description, tags, dueDate, priority)
-        );
+    var result = await mediator.Send(
+        new UpdateTaskCommand(taskId, title, description, tags, dueDate, priority)
+    );
+    if (result.IsSuccess)
         AnsiConsole.MarkupLine("[green]✓[/] Task updated successfully.");
-    }
-    catch (KeyNotFoundException ex)
-    {
-        AnsiConsole.MarkupLine($"[red]✗[/] {ex.Message}");
-    }
+    else
+        AnsiConsole.MarkupLine($"[red]✗[/] {result.Errors[0].Message}");
 }
 
 async Task DeleteTask(IMediator mediator)

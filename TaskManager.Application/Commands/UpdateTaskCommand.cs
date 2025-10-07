@@ -1,3 +1,4 @@
+using FluentResults;
 using MediatR;
 using TaskManager.Domain;
 
@@ -10,4 +11,4 @@ public record UpdateTaskCommand(
     List<String>? Tags,
     DateTime? DueDate,
     TaskPriority Priority = TaskPriority.Low
-) : IRequest<Unit>;
+) : IRequest<Result>;

@@ -1,3 +1,4 @@
+using FluentResults;
 using MediatR;
 using TaskManager.Application.Commands;
 using TaskManager.Application.Interfaces;
@@ -6,15 +7,15 @@ using TaskManager.Domain;
 namespace TaskManager.Application.Handlers;
 
 public class UpdateTaskCommandHandler(ITaskRepository TaskRepository)
-    : IRequestHandler<UpdateTaskCommand, Unit>
+    : IRequestHandler<UpdateTaskCommand, Result>
 {
-    public async Task<Unit> Handle(UpdateTaskCommand request, CancellationToken cancellationToken)
+    public async Task<Result> Handle(UpdateTaskCommand request, CancellationToken cancellationToken)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
         TaskItem? task = await TaskRepository.GetByIdAsync(request.Id, cancellationToken);
-        if (task == null)
-            throw new KeyNotFoundException($"Task with id {request.Id} not found");
+        if (task is null)
+            return Result.Fail($"Task with id {request.Id} not found");
 
         task.Title = request.Title ?? task.Title;
         task.Description = request.Description ?? task.Description;
@@ -25,6 +26,6 @@ public class UpdateTaskCommandHandler(ITaskRepository TaskRepository)
         await TaskRepository.UpdateAsync(task, cancellationToken);
         await TaskRepository.SaveChangesAsync(cancellationToken);
 
-        return Unit.Value;
+        return Result.Ok();
     }
 }
