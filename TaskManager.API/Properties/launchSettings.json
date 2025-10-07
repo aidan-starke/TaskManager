@@ -5,9 +5,10 @@
       "commandName": "Project",
       "dotnetRunMessages": true,
       "launchBrowser": false,
-      "applicationUrl": "http://localhost:5000",
+      "applicationUrl": "http://0.0.0.0:5000",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Development"
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "CORS_ORIGIN": "http://100.99.137.30:5173"
       }
     },
     "https": {

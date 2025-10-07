@@ -20,10 +20,7 @@ public class TasksController(IMediator mediator) : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
-    public async Task<ActionResult<TaskItem>> GetTask(
-        Guid id,
-        CancellationToken cancellationToken
-    )
+    public async Task<ActionResult<TaskItem>> GetTask(Guid id, CancellationToken cancellationToken)
     {
         var task = await mediator.Send(new GetTaskByIdQuery(id), cancellationToken);
         if (task == null)
@@ -47,11 +44,7 @@ public class TasksController(IMediator mediator) : ControllerBase
         );
 
         var taskId = await mediator.Send(command, cancellationToken);
-        return CreatedAtAction(
-            nameof(GetTask),
-            new { id = taskId },
-            new { id = taskId }
-        );
+        return CreatedAtAction(nameof(GetTask), new { id = taskId }, new { id = taskId });
     }
 
     [HttpPut("{id:guid}")]
@@ -78,10 +71,7 @@ public class TasksController(IMediator mediator) : ControllerBase
     }
 
     [HttpPut("{id:guid}/complete")]
-    public async Task<IActionResult> CompleteTask(
-        Guid id,
-        CancellationToken cancellationToken
-    )
+    public async Task<IActionResult> CompleteTask(Guid id, CancellationToken cancellationToken)
     {
         var result = await mediator.Send(new CompleteTaskCommand(id), cancellationToken);
         if (result.IsFailed)

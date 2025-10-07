@@ -11,28 +11,37 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddOpenApi();
 
 // Add Database
-builder.Services.AddDbContext<TaskDbContext>(options =>
-    options.UseSqlite("Data Source=tasks.db")
-);
+builder.Services.AddDbContext<TaskDbContext>(options => options.UseSqlite("Data Source=tasks.db"));
 
 // Add MediatR
 builder.Services.AddMediatR(cfg =>
-    cfg.RegisterServicesFromAssembly(typeof(TaskManager.Application.Commands.CreateTaskCommand).Assembly)
+    cfg.RegisterServicesFromAssembly(
+        typeof(TaskManager.Application.Commands.CreateTaskCommand).Assembly
+    )
 );
 
 // Add Repository
 builder.Services.AddScoped<ITaskRepository, SqliteTaskRepository>();
 
 // Add CORS
+var allowedOrigins = new List<string> { "http://localhost:5173" };
+
+// Add custom origins from environment variable
+var customOrigin = builder.Configuration["CORS_ORIGIN"];
+if (!string.IsNullOrEmpty(customOrigin))
+{
+    allowedOrigins.Add(customOrigin);
+}
+
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowReactApp", policy =>
-    {
-        policy
-            .WithOrigins("http://localhost:5173", "http://localhost:3000") // Vite default + CRA default
-            .AllowAnyMethod()
-            .AllowAnyHeader();
-    });
+    options.AddPolicy(
+        "AllowReactApp",
+        policy =>
+        {
+            policy.WithOrigins(allowedOrigins.ToArray()).AllowAnyMethod().AllowAnyHeader();
+        }
+    );
 });
 
 var app = builder.Build();
