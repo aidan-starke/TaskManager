@@ -343,7 +343,9 @@ async Task FilterTasks(IMediator mediator)
         );
     }
 
-    bool descending = AnsiConsole.Confirm("Sort in descending order?");
+    bool descending = sortField is not null
+        ? AnsiConsole.Confirm("Sort in descending order?")
+        : false;
 
     var result = await mediator.Send(
         new FilterTasksQuery(

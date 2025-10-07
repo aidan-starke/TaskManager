@@ -6,7 +6,7 @@ namespace TaskManager.Infrastructure.Repositories;
 
 public class JsonTaskRepository : ITaskRepository
 {
-    private Lazy<List<TaskItem>> TaskItems = new();
+    private readonly Lazy<List<TaskItem>> TaskItems = new();
     private FileInfo _FileInfo { get; set; }
 
     public JsonTaskRepository(string filePath)

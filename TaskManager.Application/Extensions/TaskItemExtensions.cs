@@ -54,7 +54,7 @@ public static class TaskItemExtensions
     )
     {
         if (sortField is null)
-            return descending ? tasks.Reverse() : tasks;
+            return tasks;
 
         var ordered = sortField switch
         {
