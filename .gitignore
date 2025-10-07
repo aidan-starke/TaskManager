@@ -492,3 +492,5 @@ tasks.json
 
 # Launch settings (contains license keys and local config)
 **/Properties/launchSettings.json
+
+DEPLOYMENT.md

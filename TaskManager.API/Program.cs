@@ -26,11 +26,11 @@ builder.Services.AddScoped<ITaskRepository, SqliteTaskRepository>();
 // Add CORS
 var allowedOrigins = new List<string> { "http://localhost:5173" };
 
-// Add custom origins from environment variable
-var customOrigin = builder.Configuration["CORS_ORIGIN"];
-if (!string.IsNullOrEmpty(customOrigin))
+// Add custom origins from environment variable (comma-separated)
+var customOrigins = builder.Configuration["CORS_ORIGIN"];
+if (!string.IsNullOrEmpty(customOrigins))
 {
-    allowedOrigins.Add(customOrigin);
+    allowedOrigins.AddRange(customOrigins.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries));
 }
 
 builder.Services.AddCors(options =>
