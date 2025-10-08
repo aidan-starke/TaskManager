@@ -73,7 +73,7 @@ public class TasksController(IMediator mediator) : ControllerBase
     [HttpPut("{id:guid}/complete")]
     public async Task<IActionResult> CompleteTask(
         Guid id,
-        bool isCompleted,
+        [FromQuery] bool isCompleted,
         CancellationToken cancellationToken
     )
     {
